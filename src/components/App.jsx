@@ -46,7 +46,7 @@ function App() {
               <div className="container mx-auto px-4">
                 <div className="flex flex-col md:flex-row justify-between items-center">
                   <p className="text-center md:text-left mb-4 md:mb-0">
-                    &copy; {new Date().getFullYear()} Exhibition Curation Platform
+                    &copy; {new Date().getFullYear()} Exhibeo
                   </p>
                 </div>
               </div>

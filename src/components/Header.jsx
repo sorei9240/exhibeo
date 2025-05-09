@@ -29,8 +29,8 @@ function Header() {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <Link to="/" className="text-xl md:text-2xl font-bold tracking-tight">
-            Exhibition Curation
+          <Link to="/" className="text-xl md:text-3xl font-bold tracking-tight">
+            Exhibeo
           </Link>
           
           {/* Desktop nav */}

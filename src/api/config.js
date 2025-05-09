@@ -8,7 +8,6 @@ export const MET_API = {
 // Harvard Art Museums API
 const harvardApiKey = import.meta.env.VITE_HARVARD_API_KEY;
 
-
 export const HARVARD_API = {
   baseUrl: 'https://api.harvardartmuseums.org',
   objectEndpoint: '/object',
