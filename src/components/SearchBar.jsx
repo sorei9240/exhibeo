@@ -4,21 +4,32 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 function SearchBar({ onSearch, initialSearchTerm = '' }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState(initialSearchTerm || searchParams.get('q') || '');
+
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get('q') !== null ? searchParams.get('q') : initialSearchTerm || ''
+  );
   const [source, setSource] = useState(searchParams.get('source') || 'all');
 
-  // update search term when URL params change
   useEffect(() => {
-    const queryParam = searchParams.get('q');
-    if (queryParam && queryParam !== searchTerm) {
-      setSearchTerm(queryParam);
+    const queryFromUrl = searchParams.get('q');
+    const sourceFromUrl = searchParams.get('source');
+
+    let newSearchTermValue;
+    if (queryFromUrl !== null) { 
+      newSearchTermValue = queryFromUrl;
+    } else { 
+      newSearchTermValue = initialSearchTerm || ''; // if q param not in URL fallback to initial term
     }
-    
-    const sourceParam = searchParams.get('source');
-    if (sourceParam) {
-      setSource(sourceParam);
+
+    if (newSearchTermValue !== searchTerm) {
+      setSearchTerm(newSearchTermValue);
     }
-  }, [searchParams, searchTerm]);
+
+    const newSourceValue = sourceFromUrl || 'all';
+    if (newSourceValue !== source) {
+      setSource(newSourceValue);
+    }
+  }, [searchParams, initialSearchTerm]);
 
   // form submission handler
   const handleSubmit = (e) => {
