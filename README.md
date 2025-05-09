@@ -1,6 +1,6 @@
 # Exhibeo - Digital Art Gallery Explorer
 
-![Exhibeo](https://exhibeo.netlify.app/image/logo.png)
+![Exhibeo](https://exhibeo.netlify.app/images/logo.png)
 
 Exhibeo is a web application for exploring art collections from the Metropolitan Museum of Art and Harvard Art Museums. Users can search, filter, and curate their own virtual exhibitions from thousands of artworks.
 
