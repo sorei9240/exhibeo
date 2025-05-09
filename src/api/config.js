@@ -8,10 +8,6 @@ export const MET_API = {
 // Harvard Art Museums API
 const harvardApiKey = import.meta.env.VITE_HARVARD_API_KEY;
 
-// check if API exists
-if (!harvardApiKey) {
-  console.error('Harvard API key is missing!');
-}
 
 export const HARVARD_API = {
   baseUrl: 'https://api.harvardartmuseums.org',
