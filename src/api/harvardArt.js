@@ -10,9 +10,16 @@ import { HARVARD_API, encodeSearchParams } from './config';
  * @param {number} params.page
  * @param {number} params.pageSize
  * @param {string} params.classification
+ * @param {boolean} params.excludeXrays
  * @returns {Promise<Object>}
  */
-export const searchArtworks = async ({ searchTerm, page = 1, pageSize = 20, classification = null }) => {
+export const searchArtworks = async ({ 
+  searchTerm, 
+  page = 1, 
+  pageSize = 20, 
+  classification = null,
+  excludeXrays = true 
+}) => {
   try {
     const params = {
       apikey: HARVARD_API.apiKey,
@@ -24,19 +31,36 @@ export const searchArtworks = async ({ searchTerm, page = 1, pageSize = 20, clas
       sortorder: 'desc'
     };
     
-    // add classification filter
+    // classification filter
     if (classification) {
       params.classification = classification;
     }
     
-    // make search request
+    // x-ray exclusion if enabled
+    if (excludeXrays) {
+      params.excludeterm = 'x-ray,xray,radiograph';
+    }
+    
+    // search request
     const searchUrl = `${HARVARD_API.baseUrl}${HARVARD_API.objectEndpoint}?${encodeSearchParams(params)}`;
     const { data } = await axios.get(searchUrl);
+    
     // process results
     const artworks = data.records.map(transformHarvardArtwork);
     
+    // more x-ray filtering
+    let filteredArtworks = artworks;
+    if (excludeXrays) {
+      const xrayTerms = ['x-ray', 'xray', 'radiograph', 'radiography', 'x ray'];
+      filteredArtworks = artworks.filter(artwork => {
+        const lowerTitle = (artwork.title || '').toLowerCase();
+        const lowerDesc = (artwork.description || '').toLowerCase();
+        return !xrayTerms.some(term => lowerTitle.includes(term) || lowerDesc.includes(term));
+      });
+    }
+    
     return {
-      artworks,
+      artworks: filteredArtworks,
       pagination: {
         total: data.info.totalrecords,
         page: data.info.page,
@@ -113,22 +137,40 @@ export const getClassifications = async () => {
 
 /**
  * @param {number} limit
+ * @param {boolean} excludeXrays
  * @returns {Promise<Array>}
  */
-export const getFeaturedArtworks = async (limit = 10) => {
+export const getFeaturedArtworks = async (limit = 10, excludeXrays = true) => {
   try {
     const params = {
       apikey: HARVARD_API.apiKey,
-      size: limit,
+      size: limit * 2, 
       hasimage: 1,
       sort: 'totalpageviews', // sort by popularity
       sortorder: 'desc',
       fields: 'id,title,people,dated,images,primaryimageurl,url,medium,technique,dimensions,department,culture,provenance,creditline,description,classification'
     };
     
+    // x-ray exclusion when enambled 
+    if (excludeXrays) {
+      params.excludeterm = 'x-ray,xray,radiograph';
+    }
+    
     const { data } = await axios.get(`${HARVARD_API.baseUrl}${HARVARD_API.objectEndpoint}?${encodeSearchParams(params)}`);
     
-    return data.records.map(transformHarvardArtwork);
+    let artworks = data.records.map(transformHarvardArtwork);
+    
+    // additional x-ray filters
+    if (excludeXrays) {
+      const xrayTerms = ['x-ray', 'xray', 'radiograph', 'radiography', 'x ray'];
+      artworks = artworks.filter(artwork => {
+        const lowerTitle = (artwork.title || '').toLowerCase();
+        const lowerDesc = (artwork.description || '').toLowerCase();
+        return !xrayTerms.some(term => lowerTitle.includes(term) || lowerDesc.includes(term));
+      });
+    }
+    
+    return artworks.slice(0, limit);
   } catch (error) {
     console.error('Error fetching Harvard Art Museums featured artworks:', error);
     return [];

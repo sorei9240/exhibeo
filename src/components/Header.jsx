@@ -9,16 +9,17 @@ function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // search form submission handler
+  // Search form submission handler
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setIsMenuOpen(false); // close mobile menu after search
+      setIsMenuOpen(false); // Close mobile menu after search
+      setSearchQuery(''); // Clear search after submission
     }
   };
   
-  // toggle mobile menu
+  // Toggle mobile menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -27,14 +28,14 @@ function Header() {
     <header className="bg-blue-900 text-white shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
-          {/* logo */}
+          {/* Logo */}
           <Link to="/" className="text-xl md:text-2xl font-bold tracking-tight">
             Exhibition Curation
           </Link>
           
-          {/* desktop nav */}
+          {/* Desktop nav */}
           <nav className="hidden md:flex items-center space-x-6">
-            {/* search bar */}
+            {/* Search bar */}
             <form onSubmit={handleSearch} className="relative">
               <input
                 type="text"
@@ -55,7 +56,7 @@ function Header() {
               </button>
             </form>
             
-            {/* nav links */}
+            {/* Nav links */}
             <Link 
               to="/" 
               className={`hover:text-blue-200 ${location.pathname === '/' ? 'font-semibold' : ''}`}
@@ -81,7 +82,7 @@ function Header() {
             </Link>
           </nav>
           
-          {/* button for mobile menu */}
+          {/* Button for mobile menu */}
           <button 
             className="md:hidden text-white focus:outline-none" 
             onClick={toggleMenu}
@@ -98,7 +99,7 @@ function Header() {
           </button>
         </div>
         
-        {/* menu for mobile */}
+        {/* Menu for mobile */}
         {isMenuOpen && (
           <div className="md:hidden py-4 pb-6 space-y-4">
             <form onSubmit={handleSearch} className="relative">

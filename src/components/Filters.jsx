@@ -4,7 +4,8 @@ function Filters({ onFilterChange, currentFilters = {} }) {
   const [isOpen, setIsOpen] = useState(false);
   const [localFilters, setLocalFilters] = useState({
     sortBy: currentFilters.sortBy || 'relevance',
-    filterBy: currentFilters.filterBy || ''
+    filterBy: currentFilters.filterBy || '',
+    excludeXrays: currentFilters.excludeXrays !== false // exclude x-rays by default
   });
 
   const applyFilters = () => {
@@ -15,7 +16,8 @@ function Filters({ onFilterChange, currentFilters = {} }) {
   const resetFilters = () => {
     const defaultFilters = {
       sortBy: 'relevance',
-      filterBy: ''
+      filterBy: '',
+      excludeXrays: true
     };
     setLocalFilters(defaultFilters);
     onFilterChange(defaultFilters);
@@ -24,7 +26,7 @@ function Filters({ onFilterChange, currentFilters = {} }) {
 
   return (
     <div className="relative">
-      {/* filters button */}
+      {/* Filters button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -37,13 +39,13 @@ function Filters({ onFilterChange, currentFilters = {} }) {
         Filters
       </button>
 
-      {/* dropdown for filters */}
+      {/* Dropdown for filters */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200" onClick={e => e.stopPropagation()}>
           <div className="p-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Filters and Sorting</h3>
 
-            {/* sorting options */}
+            {/* Sorting options */}
             <div className="mb-4">
               <label htmlFor="sort-by" className="block text-sm font-medium text-gray-700 mb-2">
                 Sort By
@@ -62,8 +64,8 @@ function Filters({ onFilterChange, currentFilters = {} }) {
               </select>
             </div>
 
-            {/* filtering options */}
-            <div className="mb-6">
+            {/* Filtering options */}
+            <div className="mb-4">
               <label htmlFor="filter-by" className="block text-sm font-medium text-gray-700 mb-2">
                 Filter By
               </label>
@@ -83,7 +85,26 @@ function Filters({ onFilterChange, currentFilters = {} }) {
               </select>
             </div>
 
-            {/* action buttons */}
+            {/* X-ray exclusion toggle */}
+            <div className="mb-6">
+              <div className="flex items-center">
+                <input
+                  id="exclude-xrays"
+                  type="checkbox"
+                  checked={localFilters.excludeXrays}
+                  onChange={(e) => setLocalFilters(prev => ({ ...prev, excludeXrays: e.target.checked }))}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="exclude-xrays" className="ml-2 block text-sm text-gray-700">
+                  Exclude X-ray radiographs
+                </label>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Hide technical X-ray images from search results
+              </p>
+            </div>
+
+            {/* Action buttons */}
             <div className="flex justify-end space-x-3">
               <button
                 onClick={resetFilters}
@@ -102,7 +123,7 @@ function Filters({ onFilterChange, currentFilters = {} }) {
         </div>
       )}
 
-      {/* close the overlay when clicking outside */}
+      {/* Close the overlay when clicking outside */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-5" 

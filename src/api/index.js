@@ -7,26 +7,41 @@ import * as harvardArt from './harvardArt';
  * @param {number} params.page 
  * @param {number} params.pageSize 
  * @param {Array<string>} params.sources 
+ * @param {Object} params.filters
  * @returns {Promise<Object>}
  */
 export const searchAllCollections = async ({ 
   searchTerm, 
   page = 1, 
   pageSize = 20, 
-  sources = ['all'] 
+  sources = ['all'],
+  filters = {}
 }) => {
   try {
     const searchPromises = [];
     const includeAll = sources.includes('all');
     
+    // handle X-ray exclusion from filters
+    const excludeXrays = filters.excludeXrays !== false; // Default to true if not specified
+    
     // add met if requested
     if (includeAll || sources.includes('metropolitan')) {
-      searchPromises.push(metMuseum.searchArtworks({ searchTerm, page, pageSize }));
+      searchPromises.push(metMuseum.searchArtworks({ 
+        searchTerm, 
+        page, 
+        pageSize,
+        excludeXrays
+      }));
     }
     
     // add harvard art if requested
     if (includeAll || sources.includes('harvard')) {
-      searchPromises.push(harvardArt.searchArtworks({ searchTerm, page, pageSize }));
+      searchPromises.push(harvardArt.searchArtworks({ 
+        searchTerm, 
+        page, 
+        pageSize,
+        excludeXrays 
+      }));
     }
     
     const results = await Promise.allSettled(searchPromises);
@@ -78,20 +93,21 @@ export const getArtworkById = async (id, source) => {
 
 /**
  * @param {number} limit
+ * @param {boolean} excludeXrays
  * @returns {Promise<Array>}
  */
-export const getFeaturedArtworks = async (limit = 10) => {
+export const getFeaturedArtworks = async (limit = 10, excludeXrays = true) => {
   try {
     // split between sources
     const perSourceLimit = Math.ceil(limit / 2);
     
     // get artwork from both
     const [metArtworks, harvardArtworks] = await Promise.all([
-      metMuseum.getFeaturedArtworks(perSourceLimit),
-      harvardArt.getFeaturedArtworks(perSourceLimit)
+      metMuseum.getFeaturedArtworks(perSourceLimit, excludeXrays),
+      harvardArt.getFeaturedArtworks(perSourceLimit, excludeXrays)
     ]);
     
-    // combine and shuffle
+    // sombine and shuffle
     const combined = [...metArtworks, ...harvardArtworks];
     for (let i = combined.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));

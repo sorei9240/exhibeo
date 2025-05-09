@@ -17,11 +17,12 @@ function Search() {
     updateFilters
   } = useArtworks();
 
+  // Get current search parameters from URL
   const queryTerm = searchParams.get('q');
   const source = searchParams.get('source') || 'all';
   const page = parseInt(searchParams.get('page') || '1', 10);
 
-  // init search on change & on component mount
+  // Initialize search on URL parameter changes and on component mount
   useEffect(() => {
     if (queryTerm) {
       searchArtworks({
@@ -30,14 +31,14 @@ function Search() {
         page: page
       });
     }
-  }, [queryTerm, source, page]);
+  }, [queryTerm, source, page, searchArtworks]);
 
-  // serach submission handler
+  // Handle new search submissions
   const handleSearch = (params) => {
     searchArtworks(params);
   };
 
-  // page navigation handler
+  // Page navigation handler
   const handlePageChange = (newPage) => {
     setSearchParams(prev => {
       const newParams = new URLSearchParams(prev);
@@ -47,14 +48,20 @@ function Search() {
     goToPage(newPage);
   };
 
-  // filter change handler
+  // Filter change handler
   const handleFilterChange = (filters) => {
     updateFilters(filters);
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (filters.sortBy) newParams.set('sort', filters.sortBy);
+      if (filters.filterBy) newParams.set('filter', filters.filterBy);
+      return newParams;
+    });
   };
 
   return (
     <div className="space-y-8">
-      {/* search bar */}
+      {/* Search bar */}
       <div className="lg:sticky lg:top-4 lg:z-10 lg:shadow-md lg:pb-4 lg:bg-gray-50">
         <SearchBar 
           onSearch={handleSearch}
@@ -62,7 +69,7 @@ function Search() {
         />
       </div>
 
-      {/* search results header & filters */}
+      {/* Search results header & filters */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           {queryTerm && (
@@ -93,14 +100,14 @@ function Search() {
         )}
       </div>
 
-      {/* loading state */}
+      {/* Loading state */}
       {isSearching && !searchResults && (
         <div className="flex justify-center py-20">
           <LoadingSpinner size="large" />
         </div>
       )}
 
-      {/* search results */}
+      {/* Search results */}
       {!isSearching && queryTerm && (
         <ArtworkList
           artworks={searchResults?.artworks || []}
@@ -112,7 +119,7 @@ function Search() {
         />
       )}
 
-      {/* default - no search term */}
+      {/* Default - no search term */}
       {!queryTerm && !isSearching && (
         <div className="text-center py-20">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

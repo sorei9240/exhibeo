@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 function SearchBar({ onSearch, initialSearchTerm = '' }) {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm || searchParams.get('q') || '');
   const [source, setSource] = useState(searchParams.get('source') || 'all');
 
-  // update search term
+  // update search term when URL params change
   useEffect(() => {
     const queryParam = searchParams.get('q');
     if (queryParam && queryParam !== searchTerm) {
@@ -24,21 +25,23 @@ function SearchBar({ onSearch, initialSearchTerm = '' }) {
     e.preventDefault();
     
     if (searchTerm.trim()) {
-      // update params
-      setSearchParams({ q: searchTerm.trim(), source });
+      // navigate to search page with proper parameters
+      navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}&source=${source}`);
       
-      // call search handler
-      onSearch({
-        searchTerm: searchTerm.trim(),
-        sources: source === 'all' ? ['all'] : [source]
-      });
+      // call search handler 
+      if (onSearch) {
+        onSearch({
+          searchTerm: searchTerm.trim(),
+          sources: source === 'all' ? ['all'] : [source]
+        });
+      }
     }
   };
 
   return (
     <div className="w-full bg-white p-4 rounded-lg shadow-md">
       <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4">
-        {/* input bar for search */}
+        {/* Input bar for search */}
         <div className="flex-grow">
           <label htmlFor="search-input" className="sr-only">Search artworks</label>
           <input
@@ -52,7 +55,7 @@ function SearchBar({ onSearch, initialSearchTerm = '' }) {
           />
         </div>
 
-        {/* source selection */}
+        {/* Source selection */}
         <div className="md:w-48">
           <label htmlFor="source-selector" className="sr-only">Select source</label>
           <select
@@ -68,7 +71,7 @@ function SearchBar({ onSearch, initialSearchTerm = '' }) {
           </select>
         </div>
         
-        {/* search button */}
+        {/* Search button */}
         <button
           type="submit"
           className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"

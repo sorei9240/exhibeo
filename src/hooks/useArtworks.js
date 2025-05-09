@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { searchAllCollections, getArtworkById, getFeaturedArtworks } from '../api';
 
 /**
- * hook for searching & retrieving artwork data
+ * Hook for searching & retrieving artwork data
  */
 export function useArtworks() {
   const [searchParams, setSearchParams] = useState({
@@ -11,7 +11,9 @@ export function useArtworks() {
     page: 1,
     pageSize: 20,
     sources: ['all'],
-    filters: {}
+    filters: {
+      excludeXrays: true // default to excluding X-rays
+    }
   });
 
   // query for searching works
@@ -25,7 +27,7 @@ export function useArtworks() {
     queryKey: ['artworks', 'search', searchParams],
     queryFn: () => searchAllCollections(searchParams),
     enabled: !!searchParams.searchTerm, // only run when there's a search term
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, 
     keepPreviousData: true // keep previous data while loading new data
   });
 
@@ -35,19 +37,19 @@ export function useArtworks() {
     isLoading: isFeaturedLoading,
     error: featuredError
   } = useQuery({
-    queryKey: ['artworks', 'featured'],
-    queryFn: () => getFeaturedArtworks(10),
+    queryKey: ['artworks', 'featured', searchParams.filters.excludeXrays],
+    queryFn: () => getFeaturedArtworks(10, searchParams.filters.excludeXrays),
     staleTime: 60 * 60 * 1000 // 1 hour
   });
 
   /**
-   * Ssearch with given param
+   * initiate search with given parameters
    */
   const searchArtworks = useCallback((params) => {
     setSearchParams(prevParams => ({
       ...prevParams,
       ...params,
-      // back to page 1 on change
+      // reset to page 1 on search term change
       page: params.searchTerm !== prevParams.searchTerm ? 1 : params.page || prevParams.page
     }));
   }, []);
@@ -69,12 +71,12 @@ export function useArtworks() {
     setSearchParams(prevParams => ({
       ...prevParams,
       filters: { ...prevParams.filters, ...filters },
-      page: 1 // back to page 1 on filter change
+      page: 1 // Reset to page 1 on filter change
     }));
   }, []);
 
   /**
-   * fetch a single work by id
+   * fetch a single artwork by ID
    */
   const fetchArtworkById = useCallback(async (id, source) => {
     if (!id || !source) return null;
@@ -97,7 +99,7 @@ export function useArtworks() {
     updateFilters,
     refetchSearch,
     
-    // featured
+    // featured artworks
     featuredArtworks: featuredArtworks || [],
     isFeaturedLoading,
     featuredError,

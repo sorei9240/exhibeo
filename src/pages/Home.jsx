@@ -10,12 +10,11 @@ function Home() {
     featuredArtworks, 
     isFeaturedLoading, 
     featuredError, 
-    searchParams,
     searchArtworks
   } = useArtworks();
   
   React.useEffect(() => {
-    // scroll to top on component mount
+    // Scroll to top on component mount
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -29,16 +28,13 @@ function Home() {
           Create your own virtual exhibitions by curating artworks from the world's finest museums and galleries.
         </p>
         
-        {/* search bar */}
+        {/* Search bar */}
         <div className="max-w-4xl mx-auto">
-          <SearchBar 
-            onSearch={searchArtworks}
-            initialSearchTerm={searchParams.searchTerm}
-          />
+          <SearchBar onSearch={searchArtworks} />
         </div>
       </section>
 
-      {/* features section */}
+      {/* Features section */}
       <section className="bg-blue-50 py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
@@ -79,7 +75,7 @@ function Home() {
         </div>
       </section>
 
-      {/* featured artworks section */}
+      {/* Featured artworks section */}
       <section className="py-12 px-4">
         <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
           Featured Artworks
