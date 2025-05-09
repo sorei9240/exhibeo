@@ -1,4 +1,3 @@
-
 // Metropolitan Museum of Art API
 export const MET_API = {
   baseUrl: 'https://collectionapi.metmuseum.org/public/collection/v1',
@@ -7,10 +6,17 @@ export const MET_API = {
 };
 
 // Harvard Art Museums API
+const harvardApiKey = import.meta.env.VITE_HARVARD_API_KEY;
+
+// check if API exists
+if (!harvardApiKey) {
+  console.error('Harvard API key is missing!');
+}
+
 export const HARVARD_API = {
   baseUrl: 'https://api.harvardartmuseums.org',
   objectEndpoint: '/object',
-  apiKey: import.meta.env.VITE_HARVARD_API_KEY || 'YOUR_HARVARD_API_KEY'
+  apiKey: harvardApiKey || 'missing_api_key' 
 };
 
 // encode URI components

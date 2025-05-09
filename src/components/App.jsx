@@ -48,11 +48,6 @@ function App() {
                   <p className="text-center md:text-left mb-4 md:mb-0">
                     &copy; {new Date().getFullYear()} Exhibition Curation Platform
                   </p>
-                  <div className="flex space-x-4">
-                    <a href="#accessibility" className="hover:text-gray-300">Accessibility</a>
-                    <a href="#privacy" className="hover:text-gray-300">Privacy Policy</a>
-                    <a href="#terms" className="hover:text-gray-300">Terms of Use</a>
-                  </div>
                 </div>
               </div>
             </footer>

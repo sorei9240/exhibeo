@@ -4,7 +4,7 @@ function Filters({ onFilterChange, currentFilters = {} }) {
   const [isOpen, setIsOpen] = useState(false);
   const [localFilters, setLocalFilters] = useState({
     sortBy: currentFilters.sortBy || 'relevance',
-    filterBy: currentFilters.filterBy || '',
+    medium: currentFilters.medium || '',
     excludeXrays: currentFilters.excludeXrays !== false // exclude x-rays by default
   });
 
@@ -16,7 +16,7 @@ function Filters({ onFilterChange, currentFilters = {} }) {
   const resetFilters = () => {
     const defaultFilters = {
       sortBy: 'relevance',
-      filterBy: '',
+      medium: '',
       excludeXrays: true
     };
     setLocalFilters(defaultFilters);
@@ -64,24 +64,27 @@ function Filters({ onFilterChange, currentFilters = {} }) {
               </select>
             </div>
 
-            {/* Filtering options */}
+            {/* Medium filter */}
             <div className="mb-4">
-              <label htmlFor="filter-by" className="block text-sm font-medium text-gray-700 mb-2">
-                Filter By
+              <label htmlFor="medium" className="block text-sm font-medium text-gray-700 mb-2">
+                Medium
               </label>
               <select
-                id="filter-by"
-                value={localFilters.filterBy}
-                onChange={(e) => setLocalFilters(prev => ({ ...prev, filterBy: e.target.value }))}
+                id="medium"
+                value={localFilters.medium}
+                onChange={(e) => setLocalFilters(prev => ({ ...prev, medium: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">All Types</option>
-                <option value="with-images">With Images Only</option>
+                <option value="">All Media Types</option>
                 <option value="paintings">Paintings</option>
                 <option value="sculpture">Sculptures</option>
                 <option value="prints">Prints</option>
                 <option value="photographs">Photographs</option>
-                <option value="decorative-arts">Decorative Arts</option>
+                <option value="drawings">Drawings</option>
+                <option value="textiles">Textiles</option>
+                <option value="ceramics">Ceramics</option>
+                <option value="metalwork">Metalwork</option>
+                <option value="glass">Glass</option>
               </select>
             </div>
 

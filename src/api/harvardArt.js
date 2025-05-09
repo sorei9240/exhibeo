@@ -1,8 +1,14 @@
-/**
- * Harvard Art Museums API Integration
- */
 import axios from 'axios';
-import { HARVARD_API, encodeSearchParams } from './config';
+
+const isProduction = import.meta.env.PROD;
+
+// use proxy in production
+const baseUrl = isProduction 
+  ? '/.netlify/functions/harvard-api'
+  : 'https://api.harvardartmuseums.org';
+
+// Development mode API key
+const devApiKey = import.meta.env.VITE_HARVARD_API_KEY;
 
 /**
  * @param {Object} params
@@ -22,7 +28,6 @@ export const searchArtworks = async ({
 }) => {
   try {
     const params = {
-      apikey: HARVARD_API.apiKey,
       q: searchTerm,
       page: page,
       size: pageSize,
@@ -30,6 +35,11 @@ export const searchArtworks = async ({
       sort: 'rank', // sort by relevance
       sortorder: 'desc'
     };
+    
+    // AAPI for development
+    if (!isProduction) {
+      params.apikey = devApiKey;
+    }
     
     // classification filter
     if (classification) {
@@ -41,9 +51,27 @@ export const searchArtworks = async ({
       params.excludeterm = 'x-ray,xray,radiograph';
     }
     
-    // search request
-    const searchUrl = `${HARVARD_API.baseUrl}${HARVARD_API.objectEndpoint}?${encodeSearchParams(params)}`;
-    const { data } = await axios.get(searchUrl);
+    // set up request based on env
+    let searchUrl;
+    let requestConfig = {};
+    
+    if (isProduction) {
+      // use netlify func for prod
+      searchUrl = baseUrl;
+      requestConfig = { 
+        params: {
+          ...params,
+          endpoint: '/object'
+        }
+      };
+    } else {
+      // API access for dev
+      searchUrl = `${baseUrl}/object`;
+      requestConfig = { params };
+    }
+    
+    // Make the request
+    const { data } = await axios.get(searchUrl, requestConfig);
     
     // process results
     const artworks = data.records.map(transformHarvardArtwork);
@@ -82,7 +110,28 @@ export const searchArtworks = async ({
  */
 export const getArtworkById = async (id) => {
   try {
-    const { data } = await axios.get(`${HARVARD_API.baseUrl}${HARVARD_API.objectEndpoint}/${id}?apikey=${HARVARD_API.apiKey}`);
+    let requestUrl;
+    let requestConfig = {};
+    
+    if (isProduction) {
+      // netlify func for production
+      requestUrl = baseUrl;
+      requestConfig = { 
+        params: {
+          endpoint: `/object/${id}`
+        }
+      };
+    } else {
+      // API for dev
+      requestUrl = `${baseUrl}/object/${id}`;
+      requestConfig = { 
+        params: {
+          apikey: devApiKey
+        }
+      };
+    }
+    
+    const { data } = await axios.get(requestUrl, requestConfig);
     return transformHarvardArtwork(data);
   } catch (error) {
     console.error(`Error fetching Harvard artwork with ID ${id}:`, error);
@@ -127,7 +176,30 @@ const transformHarvardArtwork = (data) => {
  */
 export const getClassifications = async () => {
   try {
-    const { data } = await axios.get(`${HARVARD_API.baseUrl}/classification?apikey=${HARVARD_API.apiKey}&size=100`);
+    let requestUrl;
+    let requestConfig = {};
+    
+    if (isProduction) {
+      // use netlify func for production
+      requestUrl = baseUrl;
+      requestConfig = { 
+        params: {
+          endpoint: '/classification',
+          size: 100
+        }
+      };
+    } else {
+      // API for dev
+      requestUrl = `${baseUrl}/classification`;
+      requestConfig = { 
+        params: {
+          apikey: devApiKey,
+          size: 100
+        }
+      };
+    }
+    
+    const { data } = await axios.get(requestUrl, requestConfig);
     return data.records;
   } catch (error) {
     console.error('Error fetching Harvard Art Museums classifications:', error);
@@ -143,7 +215,6 @@ export const getClassifications = async () => {
 export const getFeaturedArtworks = async (limit = 10, excludeXrays = true) => {
   try {
     const params = {
-      apikey: HARVARD_API.apiKey,
       size: limit * 2, 
       hasimage: 1,
       sort: 'totalpageviews', // sort by popularity
@@ -151,12 +222,34 @@ export const getFeaturedArtworks = async (limit = 10, excludeXrays = true) => {
       fields: 'id,title,people,dated,images,primaryimageurl,url,medium,technique,dimensions,department,culture,provenance,creditline,description,classification'
     };
     
-    // x-ray exclusion when enambled 
+    if (!isProduction) {
+      params.apikey = devApiKey;
+    }
+    
+    // x-ray exclusion when enabled 
     if (excludeXrays) {
       params.excludeterm = 'x-ray,xray,radiograph';
     }
     
-    const { data } = await axios.get(`${HARVARD_API.baseUrl}${HARVARD_API.objectEndpoint}?${encodeSearchParams(params)}`);
+    let requestUrl;
+    let requestConfig = {};
+    
+    if (isProduction) {
+      // netlify func for production
+      requestUrl = baseUrl;
+      requestConfig = { 
+        params: {
+          ...params,
+          endpoint: '/object'
+        }
+      };
+    } else {
+      // direct API for dev
+      requestUrl = `${baseUrl}/object`;
+      requestConfig = { params };
+    }
+    
+    const { data } = await axios.get(requestUrl, requestConfig);
     
     let artworks = data.records.map(transformHarvardArtwork);
     
